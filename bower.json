@@ -1,8 +1,8 @@
 {
-  "name": "d3-to-png",
+  "name": "svg-to-png",
   "version": "0.0.1",
-  "main": "saveSvgAsPng.js",
+  "main": "svg-to-png.js",
   "scripts": [
-    "saveSvgAsPng.js"
+    "svg-to-png.js"
   ]
 }
