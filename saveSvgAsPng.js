@@ -1,5 +1,6 @@
 (function() {
   var out$ = typeof exports != 'undefined' && exports || this;
+  out$.svgConvert = {};
 
   var doctype = '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">';
 
@@ -35,32 +36,38 @@
     }
   }
 
-  function styles(dom) {
+  function styles(dom, selectorName) {
     var used = "";
+    var re_id = new RegExp("#"+selectorName, "g");
+    var re_class = new RegExp("."+selectorName, "g");
     var sheets = document.styleSheets;
     for (var i = 0; i < sheets.length; i++) {
       var rules = sheets[i].cssRules;
       for (var j = 0; j < rules.length; j++) {
         var rule = rules[j];
-        if (typeof(rule.style) != "undefined") {
-          var elems = dom.querySelectorAll(rule.selectorText);
-          if (elems.length > 0) {
-            used += rule.selectorText + " { " + rule.style.cssText + " }\n";
+        if (rule.selectorText && typeof(rule.style) != "undefined") {
+          if (rule.selectorText.indexOf(selectorName) > -1) {
+            var st = rule.selectorText.replace(re_id, "").replace(re_class,"");
+            used += st + " { " + rule.style.cssText + " }\n";
           }
         }
       }
     }
+    // Add a font if none exists
+    if (used.indexOf("font-family") === -1)
+      used += "text { font-family: Helvetica, Arial, sans-serif;} ";
+    if (used.indexOf("font-size") === -1) 
+      used += "text { font-size: 12px;} ";
 
     var s = document.createElement('style');
     s.setAttribute('type', 'text/css');
-    s.innerHTML = "<![CDATA[\n" + used + "\n]]>";
-
+    s.innerHTML = used;
     var defs = document.createElement('defs');
     defs.appendChild(s);
     return defs;
   }
 
-  out$.svgAsDataUri = function(el, scaleFactor, cb) {
+  function svgAsDataUri(el, selectorName, scaleFactor, cb) {
     scaleFactor = scaleFactor || 1;
 
     inlineImages(function() {
@@ -79,7 +86,7 @@
       clone.setAttribute("viewBox", "0 0 " + width + " " + height);
       outer.appendChild(clone);
 
-      clone.insertBefore(styles(clone), clone.firstChild);
+      clone.insertBefore(styles(clone, selectorName), clone.firstChild);
 
       var svg = doctype + outer.innerHTML;
       var uri = 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(svg)));
@@ -88,24 +95,39 @@
       }
     });
   }
+  function getUri(selectorName, scaleFactor, callback) {
+    var el = document.getElementById(selectorName);
+    svgAsDataUri(el, selectorName, scaleFactor, function(uri) {
+      callback(uri);
+    });
+  }
+  function downloadPng(uri, fileName) {
+    var image = new Image();
+    image.src = uri;
+    image.onload = function() {
+      var canvas = document.createElement('canvas');
+      canvas.width = image.width;
+      canvas.height = image.height;
+      var context = canvas.getContext('2d');
+      context.drawImage(image, 0, 0);
 
-  out$.saveSvgAsPng = function(el, name, scaleFactor) {
-    out$.svgAsDataUri(el, scaleFactor, function(uri) {
-      var image = new Image();
-      image.src = uri;
-      image.onload = function() {
-        var canvas = document.createElement('canvas');
-        canvas.width = image.width;
-        canvas.height = image.height;
-        var context = canvas.getContext('2d');
-        context.drawImage(image, 0, 0);
-
-        var a = document.createElement('a');
-        a.download = name;
-        a.href = canvas.toDataURL('image/png');
-        document.body.appendChild(a);
-        a.click();
-      }
+      var a = document.createElement('a');
+      a.download = fileName;
+      a.href = canvas.toDataURL('image/png');
+      document.body.appendChild(a);
+      a.click();
+    }
+  }
+  out$.svgConvert.svgToPngBytes = function(selectorName, callback, scale) {
+    scale ? scaleFactor = scale : scaleFactor = 3;
+    getUri(selectorName, scaleFactor, function(uri) {
+      callback(uri);
+    });    
+  }
+  out$.svgConvert.downloadSvgAsPng = function(selectorName, fileName, scale) {
+    scale ? scaleFactor = scale : scaleFactor = 3;
+    getUri(selectorName, scaleFactor, function(uri) {
+      downloadPng(uri, fileName);
     });
   }
 })();
