@@ -1,6 +1,8 @@
 D3 to PNG
 ============
 
+### Download PNG
+
 To save a D3 SVG as a PNG, call ```svgConvert.downloadSvgAsPng(selectorName, fileName, scale)``` where
 
 *selectorName* is the ID of the element containing the D3 SVG, as well as the selector for CSS styling.*
@@ -8,6 +10,9 @@ To save a D3 SVG as a PNG, call ```svgConvert.downloadSvgAsPng(selectorName, fil
 *fileName* is the name you would like your PNG file to have.
 
 *scale* is an optional parameter to increase or decrease your image's size. The default is 3.
+
+
+### SVG to PNG URI
 
 To get the PNG URI for the SVG, call ```svgConvert.svgToPngBytes(selectorName, callback, scale)``` where
 
@@ -17,6 +22,8 @@ To get the PNG URI for the SVG, call ```svgConvert.svgToPngBytes(selectorName, c
 
 *scale* is the same as above.
 
+
+#### Notes
 
 \* CSS selector namespacing was added because, for our usage, we have many visualizations with unique styles defined for elements like "line" and "axis". Simply rolling up all application styles and applying them to the PNG won't ensure the right CSS styles are applied.
 
