@@ -22,6 +22,12 @@ To get the PNG URI for the SVG, call ```svgConvert.svgToPngBytes(selectorName, c
 
 *scale* is the same as above.
 
+### Download image URI as PNG
+
+Call ```svgConvert.downloadUriAsPng(uri, fileName)```.
+
+Quick addition for a project, this ideally will not be exposed in the future.
+
 
 #### Notes
 

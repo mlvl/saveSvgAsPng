@@ -130,4 +130,7 @@
       downloadPng(uri, fileName);
     });
   }
+  out$.svgConvert.downloadUriAsPng = function(uri, fileName) {
+    downloadPng(uri, fileName);
+  };
 })();
